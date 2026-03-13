@@ -403,6 +403,100 @@
     margin: 20px 0;
   }
 
+  /* ===== GIFT CARD REVEAL ===== */
+  .gift-reveal {
+    text-align: center;
+    animation: fadeInUp 1.2s ease;
+  }
+  .gift-reveal h1 {
+    font-family: 'Cinzel Decorative', cursive;
+    font-size: clamp(1.8rem, 5vw, 2.8rem);
+    color: var(--gold);
+    margin-bottom: 10px;
+  }
+  .gift-subtitle {
+    color: var(--gold-light);
+    font-style: italic;
+    font-size: 1.1rem;
+    margin-bottom: 30px;
+  }
+  .gift-card-container {
+    position: relative;
+    display: inline-block;
+    margin: 20px 0;
+    animation: giftAppear 1.5s ease;
+  }
+  .gift-card-container::before {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    background: linear-gradient(45deg, var(--gold), var(--gold-light), #fff, var(--gold-light), var(--gold));
+    background-size: 400% 400%;
+    border-radius: 14px;
+    z-index: -1;
+    animation: borderShimmer 3s ease-in-out infinite;
+  }
+  .gift-card-container iframe {
+    display: block;
+    border-radius: 10px;
+    border: none;
+    background: white;
+  }
+  @keyframes giftAppear {
+    0% { opacity: 0; transform: scale(0.5) rotateY(90deg); }
+    50% { opacity: 1; transform: scale(1.05) rotateY(0deg); }
+    70% { transform: scale(0.98); }
+    100% { transform: scale(1); }
+  }
+  @keyframes borderShimmer {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+  .gift-sparkle {
+    position: fixed;
+    pointer-events: none;
+    z-index: 200;
+    font-size: 1.5rem;
+    animation: sparkleFloat var(--dur) ease-out forwards;
+  }
+  @keyframes sparkleFloat {
+    0% { opacity: 1; transform: translateY(0) scale(1); }
+    100% { opacity: 0; transform: translateY(-80px) scale(0.3); }
+  }
+  .gift-message {
+    color: var(--cream);
+    font-size: 1.1rem;
+    line-height: 1.8;
+    margin: 25px 0;
+  }
+  .squeeze-title {
+    font-family: 'Cinzel Decorative', cursive;
+    font-size: 1.8rem;
+    color: var(--gold-light);
+    animation: shimmer 3s ease-in-out infinite;
+    margin: 10px 0 5px;
+  }
+  .gift-download-btn {
+    font-family: 'Cinzel Decorative', cursive;
+    display: inline-block;
+    padding: 14px 40px;
+    border: 2px solid var(--gold);
+    border-radius: 50px;
+    background: linear-gradient(135deg, rgba(212,168,67,0.2), rgba(212,168,67,0.05));
+    color: var(--gold);
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-decoration: none;
+    margin-top: 10px;
+  }
+  .gift-download-btn:hover {
+    background: var(--gold);
+    color: var(--dark);
+    box-shadow: 0 0 40px rgba(212,168,67,0.5);
+    transform: translateY(-2px);
+  }
+
   /* ===== MATCHING PUZZLE ===== */
   .match-container {
     display: grid;
@@ -945,12 +1039,72 @@ function showFinalScreen() {
         (Okay, they did. Because you're worth it.)</em><br><br>
         <span style="font-size: 2rem;">🇭🇷 ❤️ 🇳🇴</span>
       </div>
-      <button class="btn" onclick="location.reload()">Play Again? 👸</button>
+      <button class="btn" onclick="showGiftReveal()" id="claimPrizeBtn">But wait... claim your prize! 🎁</button>
     </div>
   `;
 
   document.getElementById('progressBar').style.width = '100%';
 }
+
+function launchSparkles() {
+  const emojis = ['✨', '💫', '⭐', '🌟', '💛', '👑'];
+  for (let i = 0; i < 25; i++) {
+    const sparkle = document.createElement('div');
+    sparkle.className = 'gift-sparkle';
+    sparkle.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+    sparkle.style.cssText = `
+      left: ${Math.random() * 100}vw;
+      top: ${30 + Math.random() * 60}vh;
+      --dur: ${Math.random() * 2 + 1.5}s;
+      animation-delay: ${Math.random() * 2}s;
+    `;
+    document.body.appendChild(sparkle);
+    setTimeout(() => sparkle.remove(), 5000);
+  }
+}
+
+window.showGiftReveal = function() {
+  launchConfetti();
+  launchSparkles();
+  setTimeout(launchConfetti, 1000);
+  setTimeout(launchSparkles, 800);
+  setTimeout(launchConfetti, 2500);
+  setTimeout(launchSparkles, 2000);
+
+  const app = document.getElementById('app');
+  app.innerHTML = `
+    <div class="gift-reveal">
+      <div class="final-emoji">🎁👑✨</div>
+      <h1>Every Princess Deserves a Royal Reward</h1>
+      <p class="gift-subtitle">You braved the journey. You found the light. Now... relax.</p>
+
+      <div class="squeeze-title">Squeeze</div>
+      <p style="color: #aaa; font-size: 0.95rem; margin-bottom: 20px;">A massage fit for a princess</p>
+
+      <div class="gift-card-container">
+        <iframe src="giftcard.pdf" width="380" height="540" title="Squeeze Gift Card"></iframe>
+      </div>
+
+      <div class="gift-message">
+        You crossed an entire continent, survived Norwegian winters,<br>
+        and made everyone's life brighter just by being you.<br><br>
+        Now let someone take care of YOU for once.<br><br>
+        <span class="ouf">OUF!</span> You deserve it. 💆‍♀️👑<br><br>
+        <span style="color: var(--gold);">Happy Birthday, Bianca!</span>
+      </div>
+
+      <a class="gift-download-btn" href="giftcard.pdf" download="Bianca-Squeeze-GiftCard.pdf">
+        Download Your Gift Card 🎁
+      </a>
+
+      <br><br>
+      <button class="btn" onclick="location.reload()" style="margin-top: 15px; border-color: #555; color: #888;">Play Again? 👸</button>
+    </div>
+  `;
+
+  setTimeout(launchSparkles, 3500);
+  setTimeout(launchConfetti, 4000);
+};
 
 function shuffleArray(arr) {
   const a = [...arr];
