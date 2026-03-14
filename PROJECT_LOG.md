@@ -81,6 +81,29 @@ Speed. With a 30-minute deadline, a single HTML file with GitHub Pages was the f
 
 ---
 
+## Features (added post-launch)
+
+### Progress Saving
+- Current level saved to `localStorage` on every navigation action
+- Refreshing the page resumes at the exact level/page you were on
+- "Play Again" button clears saved progress
+
+### Secret Password Fast-Track
+- Password field on the title screen (subtle, below the start button)
+- Entering `OUF2026` skips directly to the gift card reward page
+- Password is only revealed at the bottom of the reward page after completing the quest
+
+### Back Button Navigation
+- "Go Back" button appears at the top of every chapter
+- Chapter 1 goes back to the title screen
+- Going back saves progress so refreshing stays on the current page
+
+### Feedback Fix
+- When selecting the correct answer, the response message and the success message are shown stacked (appended), not replacing each other
+- Prevents the jarring experience of text being yanked away mid-read
+
+---
+
 ## Files
 
 | File | Purpose |
@@ -97,6 +120,8 @@ Speed. With a 30-minute deadline, a single HTML file with GitHub Pages was the f
 |--------|-------------|
 | `9c50f9e` | Initial build — all 10 levels, animations, puzzles, birthday finale |
 | `0ecc8d0` | Added gift card reveal as final prize with shimmer/sparkle animations |
+| `c354a2d` | Added project log |
+| `47c9019` | Added progress saving, secret password (OUF2026), back button on all levels, and feedback append fix |
 
 ---
 
@@ -134,3 +159,4 @@ Speed. With a 30-minute deadline, a single HTML file with GitHub Pages was the f
 5. Deployed via GitHub Pages
 6. Added gift card reveal as the final prize
 7. Total time: under 30 minutes from idea to live URL
+8. Post-launch: added progress saving, secret password, back button, and feedback fix (ported from Rafal's escape site improvements)
