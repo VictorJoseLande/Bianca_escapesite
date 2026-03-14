@@ -546,6 +546,54 @@
   .slider-row input[type="range"] { flex: 1; accent-color: var(--gold); }
   .slider-value { color: var(--gold); font-weight: 600; min-width: 30px; }
 
+  /* ===== PASSWORD FIELD ===== */
+  .password-section {
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(212,168,67,0.15);
+  }
+  .password-section label {
+    font-family: 'Inter', sans-serif;
+    color: #666;
+    font-size: 0.8rem;
+    display: block;
+    margin-bottom: 8px;
+  }
+  .password-input {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.9rem;
+    padding: 10px 16px;
+    border: 1px solid rgba(212,168,67,0.25);
+    border-radius: 8px;
+    background: rgba(0,0,0,0.3);
+    color: var(--cream);
+    text-align: center;
+    width: 200px;
+    outline: none;
+    transition: all 0.3s;
+  }
+  .password-input:focus {
+    border-color: var(--gold);
+    box-shadow: 0 0 15px rgba(212,168,67,0.2);
+  }
+  .password-input::placeholder { color: #444; }
+  .password-reveal {
+    margin-top: 20px;
+    padding: 15px 20px;
+    background: rgba(212,168,67,0.1);
+    border: 1px dashed rgba(212,168,67,0.4);
+    border-radius: 10px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem;
+    color: #aaa;
+  }
+  .password-reveal code {
+    color: var(--gold);
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+  }
+
   /* ===== RESPONSIVE ===== */
   @media (max-width: 500px) {
     .options-grid { grid-template-columns: 1fr; }
@@ -564,7 +612,24 @@
 
 <script>
 // ===== GAME STATE =====
+const SECRET_PASSWORD = 'OUF2026';
+const SAVE_KEY = 'bianca_escape_progress';
 const state = { level: 0, attempts: {} };
+
+function saveProgress() {
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify({ level: state.level })); } catch(e) {}
+}
+
+function loadProgress() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(SAVE_KEY));
+    return saved && saved.level ? saved.level : 0;
+  } catch(e) { return 0; }
+}
+
+function clearProgress() {
+  try { localStorage.removeItem(SAVE_KEY); } catch(e) {}
+}
 
 // ===== LEVEL DATA =====
 const levels = [
@@ -784,6 +849,14 @@ function renderTitle() {
         that the loudest person in the room might also be the brightest light in it.
       </p>
       <button class="btn" onclick="startGame()">Begin the Adventure</button>
+      <div class="password-section">
+        <label>Have the secret password? Enter it to skip ahead:</label>
+        <input class="password-input" id="passwordInput" type="password" placeholder="🔒 Password..."
+          onkeydown="if(event.key==='Enter')tryPassword()">
+        <br>
+        <button class="btn btn-small" onclick="tryPassword()" style="margin-top:8px; border-color: #555; color: #888;">Unlock</button>
+        <div id="passwordFeedback"></div>
+      </div>
     </div>
   `;
 }
@@ -810,6 +883,7 @@ function renderLevel(num) {
 
   app.innerHTML = `
     <div class="level-screen">
+      <button class="btn btn-small" onclick="prevLevel()" style="border-color:#555; color:#888; margin-bottom:15px; align-self:flex-start;">← Go Back</button>
       <div class="level-header">Chapter ${num} of 10</div>
       <span class="level-emoji">${lvl.emoji}</span>
       <h2 class="level-title">${lvl.title}</h2>
@@ -1010,12 +1084,15 @@ function showWrong(msg) {
 }
 
 function showCorrect(msg) {
-  showFeedback(msg, 'correct');
+  const fb = document.getElementById('feedback');
+  fb.innerHTML += `<div class="feedback correct" style="margin-top:10px;">${msg}</div>`;
   runPrincess();
   document.getElementById('nextBtn').style.display = 'inline-block';
 }
 
 function showFinalScreen() {
+  state.level = 11;
+  saveProgress();
   launchConfetti();
   setTimeout(launchConfetti, 1500);
   setTimeout(launchConfetti, 3000);
@@ -1097,8 +1174,13 @@ window.showGiftReveal = function() {
         Download Your Gift Card 🎁
       </a>
 
-      <br><br>
-      <button class="btn" onclick="location.reload()" style="margin-top: 15px; border-color: #555; color: #888;">Play Again? 👸</button>
+      <div class="password-reveal">
+        Want to come back here directly next time?<br>
+        Use this secret password on the title screen: <code>OUF2026</code>
+      </div>
+
+      <br>
+      <button class="btn" onclick="clearProgress();location.reload()" style="margin-top: 15px; border-color: #555; color: #888;">Play Again? 👸</button>
     </div>
   `;
 
@@ -1117,14 +1199,47 @@ function shuffleArray(arr) {
 
 // ===== NAVIGATION =====
 
+window.tryPassword = function() {
+  const input = document.getElementById('passwordInput');
+  const val = input.value.trim().toUpperCase();
+  if (val === SECRET_PASSWORD) {
+    state.level = 11;
+    saveProgress();
+    updateProgress();
+    showGiftReveal();
+  } else {
+    const fb = document.getElementById('passwordFeedback');
+    fb.innerHTML = '<div class="feedback wrong" style="margin-top:10px;">Wrong password. Complete the quest to earn it!</div>';
+    input.value = '';
+    setTimeout(() => { fb.innerHTML = ''; }, 2500);
+  }
+};
+
+window.prevLevel = function() {
+  if (state.level <= 1) {
+    state.level = 0;
+    saveProgress();
+    updateProgress();
+    renderTitle();
+  } else {
+    state.level--;
+    saveProgress();
+    updateProgress();
+    currentWord = '';
+    renderLevel(state.level);
+  }
+};
+
 window.startGame = function() {
   state.level = 1;
+  saveProgress();
   updateProgress();
   renderLevel(1);
 };
 
 window.nextLevel = function() {
   state.level++;
+  saveProgress();
   updateProgress();
   if (state.level > 10) {
     showFinalScreen();
@@ -1136,7 +1251,19 @@ window.nextLevel = function() {
 
 // ===== INIT =====
 createStars();
-renderTitle();
+
+const savedLevel = loadProgress();
+if (savedLevel > 10) {
+  state.level = savedLevel;
+  updateProgress();
+  showGiftReveal();
+} else if (savedLevel > 0) {
+  state.level = savedLevel;
+  updateProgress();
+  renderLevel(savedLevel);
+} else {
+  renderTitle();
+}
 </script>
 
 </body>
